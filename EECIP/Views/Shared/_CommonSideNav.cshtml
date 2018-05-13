@@ -1,0 +1,41 @@
+﻿<div class="col-md-3 sidelayoutsection">
+    <div class="main-side-box clearfix">
+        @if (User.Identity.IsAuthenticated)
+        {
+            <div class="createtopicbutton">
+                @if (Model != null)
+                {
+
+                    try
+                    {
+                        <a href="@Url.Action("Create", "Forum", new { id = Model.CategoryWithSub.Category.Id })" class="btn btn-success btn-lg btn-block">
+                            New Discussion
+                        </a>
+                    }
+                    catch
+                    {
+
+                        <a href="@Url.Action("Create", "Forum")" class="btn btn-success btn-lg btn-block">
+                            New Discussion
+                        </a>
+                    }
+
+                }
+                else
+                {
+                    <a href="@Url.Action("Create", "Forum")" class="btn btn-success btn-lg btn-block">
+                        New Discussion
+                    </a>
+                }
+            </div>
+        }
+
+        @*@Html.Action("Index", "Language")*@
+        @Html.Action("ListCategorySideMenu", "Forum")
+        @Html.Action("PopularTags", "Forum")
+        @*@Html.Action("SideSearch", "Search")
+
+            @Html.Action("CurrentWeekHighPointUsers", "Point")
+            @Html.Action("HotTopics", "Topic")*@
+    </div>
+</div>

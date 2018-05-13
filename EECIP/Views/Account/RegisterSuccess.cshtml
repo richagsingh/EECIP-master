@@ -1,0 +1,21 @@
+﻿@{
+    ViewBag.Title = "Successfully Registered";
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+}
+
+<div class="box-forgot" style="display: block;">
+    <form class="form-forgot" novalidate="novalidate">
+        <div class="alert alert-success">
+            <h4><i class="fa fa-ok-sign"></i>Email Verification Required!</h4>
+            <br />
+            You will need to verify your account. Please <b>check your email</b> and <b>click the link in the email</b> to verify your account.
+            <br/>
+            <br/>
+            @Html.Partial("~/Views/Shared/_ValidationSummary.cshtml")
+        </div>
+        <div class="text-center">
+            <a href="@Url.Action("Index", "Home") " class="btn btn-primary">Return to Home Page</a>
+        </div>
+    </form>
+</div>
+

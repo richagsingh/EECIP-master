@@ -1,0 +1,471 @@
+﻿@using EECIP.App_Logic.BusinessLogicLayer
+@model EECIP.Models.vmDashboardProjectDetails
+@{
+    ViewBag.Title = "Project Details";
+    ViewBag.SubTitle = "for " + Model.orgName;
+}
+
+@using (Html.BeginForm("ProjectEdit", "Dashboard", FormMethod.Post, new { @id = "norepostform", enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.project.ORG_IDX)
+    @Html.HiddenFor(model => model.project.PROJECT_IDX)
+    @Html.HiddenFor(model => model.ReturnURL)
+
+<div class="row ">
+    <div class="col-sm-6 ">
+        <section class="panel panel-default">
+            <div class="panel-heading">
+                Project Overview
+                <div class="panel-tools">
+                    <a class="btn btn-xs panel-collapse collapses" href="#">
+                    </a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>Project Name</label>
+                            @Html.TextBoxFor(model => model.project.PROJ_NAME, new { @class = "form-control", @maxlength = "150" })
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>Project Description</label>
+                            @Html.TextAreaFor(model => model.project.PROJ_DESC, new { @class = "form-control", @rows = "7" })
+                            @Html.ValidationMessageFor(model => model.project.PROJ_DESC)
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Media</label>
+                            @Html.DropDownListFor(model => model.project.MEDIA_TAG, Model.ddl_Media, "", new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.project.MEDIA_TAG)
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Program Area(s)</label>
+                            @Html.ListBoxFor(model => model.SelectedProgramAreas, Model.AllProgramAreas, new { multiple = "multiple", @class = "form-control search-select" })
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Start Year</label>
+                            @Html.TextBoxFor(model => model.project.START_YEAR, new { @class = "form-control", @maxlength = "4" })
+                            @Html.ValidationMessageFor(model => model.project.START_YEAR)
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Year Most Recently Active</label>
+                            @Html.TextBoxFor(model => model.project.DATE_LAST_UPDATE, new { @class = "form-control", @maxlength = "4" })
+                            @Html.ValidationMessageFor(model => model.project.DATE_LAST_UPDATE)
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Current Implementation Status</label>
+                            @Html.DropDownListFor(model => model.project.PROJ_STATUS, Model.ddl_Status, "", new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.project.PROJ_STATUS)
+                        </div>
+                    </div>
+                </div>
+                <span class="help-inline col-sm-12"> <i class="clip-info"></i> Record source:  @Model.project.RECORD_SOURCE</span>
+                <span class="help-inline col-sm-12"> <i class="clip-info"></i> Data last updated: @(Model.project.MODIFY_DT ?? @Model.project.CREATE_DT)</span>
+            </div>
+        </section>
+    </div>
+    <div class="col-sm-6 ">
+        <section class="panel panel-default">
+            <div class="panel-heading">
+                Project Attributes
+                <div class="panel-tools">
+                    <a class="btn btn-xs panel-collapse collapses" href="#">
+                    </a>
+                </div>
+            </div>
+            <div class="panel-body" style="max-height: 500px;overflow-y: auto;">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>Tags (what aspects of this project would be of most interest to your peers in other agencies)</label>
+                            @Html.ListBoxFor(model => model.SelectedFeatures, Model.AllFeatures, new { multiple = "multiple", @class = "form-control search-select", @style = "display: block;" })
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Commercial Off the Shelf (COTS)/In-House?</label>
+                            @Html.DropDownListFor(model => model.project.COTS, Model.ddl_COTS, "", new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.project.COTS)
+                        </div>
+                    </div>
+                    <div id="cotsdesc" class="col-md-6" style="display: none;">
+                        <div class="form-group">
+                            <label>Vendor</label>
+                            @Html.TextBoxFor(model => model.project.VENDOR, new { @class = "form-control", @maxlength = "100" })
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Was business process modernization a part of this project?</label>
+                            @Html.DropDownListFor(model => model.project.BP_MODERN_IND, Model.ddl_UseAmount, "", new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.project.BP_MODERN_IND)
+                        </div>
+                    </div>
+                    <div id="bpdesc" class="col-md-6" style="display: none;">
+                        <div class="form-group">
+                            <label>Describe</label>
+                            @Html.TextBoxFor(model => model.project.BP_MODERN_DESC, new { @class = "form-control", @maxlength = "100" })
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Is there a mobile component?</label>
+                            @Html.DropDownListFor(model => model.project.MOBILE_IND, Model.ddl_UseAmount, "", new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.project.MOBILE_IND)
+                        </div>
+                    </div>
+                    <div id="mobiledesc" class="col-md-6" style="display: none;">
+                        <div class="form-group">
+                            <label>Describe</label>
+                            @Html.TextBoxFor(model => model.project.MOBILE_DESC, new { @class = "form-control", @maxlength = "100" })
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Does this involve advanced monitoring?</label>
+                            @Html.DropDownListFor(model => model.project.ADV_MON_IND, Model.ddl_UseAmount, "", new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.project.ADV_MON_IND)
+                        </div>
+                    </div>
+                    <div id="advmondesc" class="col-md-6" style="display: none;">
+                        <div class="form-group">
+                            <label>Describe</label>
+                            @Html.TextBoxFor(model => model.project.ADV_MON_DESC, new { @class = "form-control", @maxlength = "100" })
+                        </div>
+                    </div>
+                </div>
+                @*<div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label>Project URL</label>
+                    <span class="input-icon input-icon-right">
+                        @Html.TextBoxFor(model => model.project.PROJECT_URL, new { @class = "form-control", @maxlength = "200" })
+                        <i class="clip-question-2 input-tooltip popovers" data-content="Provide a link to the project's website" data-placement="left" data-trigger="hover" data-rel="popover" data-original-title=""></i>
+                    </span>
+                    @Html.ValidationMessageFor(model => model.project.PROJECT_URL)
+                    <span class="help-block"><i class="clip-info"></i> Provide a link to the project's website</span>
+                </div>
+            </div>
+        </div>*@
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">                        
+                            <input id="btnAdd" type="button" value="Add Project URL" onclick="AddProjectURL();" />
+                            <br />
+                            <br />
+                            <div id="divurl">
+                                <!--Textboxes will be added here -->
+                                @{
+                                    var index = 0;
+                                }
+                                @foreach (var item in Model.sProjectUrlList)
+                                {
+
+                                    var sProjectUrlLabel = "sProjectUrlList" + index + "_Name";
+                                    var sProjectUrl = "sProjectUrlList" + index + "_PROJECT_URL";
+                                    var sProjectUrlName = "sProjectUrlList[" + index + "].PROJECT_URL";
+
+                                    var sProjectDescLabel = "sProjectUrlList" + index + "_DESC";
+                                    var sProjectDesc = "sProjectUrlList" + index + "_PROJ_URL_DESC";
+                                    var sProjectDescName = "sProjectUrlList[" + index + "].PROJ_URL_DESC";
+
+                                <span>
+                                <label for=@sProjectUrlLabel>URL</label>
+                                <input id=@sProjectUrl class="text-box single-line"
+                                       type="text" value=@item.PROJECT_URL name=@sProjectUrlName>
+
+                                <label for=@sProjectDescLabel>Description</label>
+                                <input id=@sProjectDesc class="text-box single-line"
+                                       type="text" value="@item.PROJ_URL_DESC" name=@sProjectDescName>
+
+                                <a href="#" onclick="RemoveTextBox(this)">Remove</a>
+                                <br /><br />
+                                </span>
+                                index++;
+                                }
+                            </div>                          
+                        </div>
+                    </div>
+                </div>               
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="row aligned-row">
+    <section class="col-md-6 ">
+        <section class="panel panel-default @(Model.NewProjInd == false && (Model.project.PROJECT_CONTACT_IDX == null && String.IsNullOrEmpty(Model.project.PROJECT_CONTACT)) && Model.orgType != "Governance" ? "danger" : "") ">
+            <div class="panel-heading">
+                Project Contact
+                <div class="panel-tools">
+                    <a class="btn btn-xs panel-collapse collapses" href="#">
+                    </a>
+                </div>
+            </div>
+            <div class="panel-body">
+                @if(Model.NewProjInd == false && (Model.project.PROJECT_CONTACT_IDX == null && String.IsNullOrEmpty(Model.project.PROJECT_CONTACT))  && Model.orgType != "Governance")
+                {
+                    <div class="alert alert-block alert-danger fade in">
+                        <button data-dismiss="alert" class="close" type="button">×</button>
+                        <h4 class="alert-heading"><i class="fa fa-times-circle"></i> Claim this Project!</h4>
+                        <p>
+                            Help other agencies get in touch with you by selecting a project contact from the list below.
+                        </p>
+                    </div>
+                }
+
+                @if(Model.orgType != "Governance")
+                {
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>Select user below:</label>
+                            @Html.DropDownListFor(model => model.project.PROJECT_CONTACT_IDX, Model.ddl_AgencyUsers, "", new { @class = "form-control" })
+                        </div>
+                    </div>
+                </div>
+                }
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            @if (Model.orgType != "Governance") {
+                            <label>Or if user doesn't have an EECIP account, enter contact info here:</label>
+                            } else {
+                            <label>Governance group contact:</label>
+                            }
+                            @Html.TextBoxFor(model => model.project.PROJECT_CONTACT, new { @class = "form-control", @maxlength = "100" })
+                            @Html.ValidationMessageFor(model => model.project.PROJECT_CONTACT)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </section>
+    <section class="col-md-6 aligned-row">
+        <section class="panel panel-default">
+            <div class="panel-heading">
+                Project Files
+                <div class="panel-tools">
+                    <a class="btn btn-xs panel-collapse collapses" href="#">
+                    </a>
+                </div>
+            </div>
+            <div class="panel-body">
+                @if (Model.files_existing != null && Model.files_existing.Count > 0)
+                {
+                    <div class="postuploadedfilesholder clearfix">
+                        <p>Attached Files</p>
+                        <ul>
+                            @foreach (var file in Model.files_existing.OrderByDescending(o => o.CREATE_DT))
+                            {
+                            <li>
+                                <a class="fileupload" href="@Url.Action("ProjectFileDownload", "Dashboard", new { id = file.DOC_IDX })">
+                                    @if (Utils.FileIsImage(file.DOC_NAME))
+                                    {
+                            <span class="glyphicon glyphicon-picture" aria-hidden="true"></span>
+                                    }
+                                    else
+                                    {
+                            <span class="glyphicon glyphicon-file" aria-hidden="true"></span>
+                                    }
+                                </a>
+                                <a href="@Url.Action("ProjectFileDelete", "Dashboard", new { id = file.DOC_IDX })" class="deleteupload" title="Delete">
+                                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                </a>
+
+                                <div class="postedfilename">@file.DOC_NAME</div>
+                                <div>
+                                    @file.DOC_COMMENT
+                                </div>
+                            </li>
+                                
+                            }
+                        </ul>
+                    </div>
+                }
+
+                    <div class="col-md-10 col-md-offset-1 topiccategory">
+                        <div class="form-group createuploadfiles">
+                            @Html.LabelFor(x => x.files)
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-btn">
+                                    <span class="btn btn-default btn-file">
+                                        Browse <input type="file" name="files" id="files" value="">
+                                    </span>
+                                </span>
+                                <input id="filename1" type="text" class="form-control" readonly="">
+                            </div>
+                            @Html.ValidationMessageFor(x => x.files)
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            @Html.TextBoxFor(model => model.FileDescription, new { @class = "form-control", @maxlength = "200" })
+                        </div>
+                    </div>
+
+            </div>
+        </section>
+    </section>
+
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <button type="submit" name="submitButton" value="Save" class="btn btn-primary">Save</button>
+        <a href="@Url.Action(Model.ReturnURL, "Dashboard")" class="btn btn-default">Close</a>
+        @if (Model.project.PROJ_NAME != null) {
+        <div class="delete-section" style="display:inline">
+            <a class=" btn btn-danger delete-link">Delete Project</a>
+            <div class="btn btn-warning delete-confirm" style="display:none" data-delete-id="@Model.project.PROJECT_IDX" data-delete-p="/Dashboard/ProjectsDelete" data-success-url="/Dashboard/Index"><b>Confirm Delete</b></div>
+        </div>
+        }
+    </div>
+</div>
+<p></p>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/confirmdelete")
+    @Scripts.Render("~/bundles/select2")
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            //function to initiate Select2
+            $(".search-select").select2({
+                placeholder: "",
+                allowClear: true,
+                tags: true,
+                width: ''
+            });
+
+            //google analytics
+            $("#norepostform").on("submit", function () {
+                gtag("event", "edit", {
+                    "event_category": "engagement",
+                    "event_label": "Agency Project"
+                });
+            });
+
+            //file upload display filename
+            $("input[id='files']").change(function (e) {
+                var $this = $(this);
+                var FileSize = this.files[0].size / 1024 / 1024;
+                if (FileSize > 20) {
+                    $('#files').val('');
+                    alert('Project files cannot exceed 20 MB');
+                }
+                else {
+                    $("#filename1").val($this.val().split('\\').pop());
+                }
+            });
+
+            //handling div visibility
+            toggleDIV('#project_MOBILE_IND option:selected', '#mobiledesc', false);
+            toggleDIV('#project_ADV_MON_IND option:selected', '#advmondesc', false);
+            toggleDIV('#project_BP_MODERN_IND option:selected', '#bpdesc', false);
+            toggleCOTS();
+
+            $('#project_MOBILE_IND').change(function () {
+                toggleDIV('#project_MOBILE_IND option:selected', '#mobiledesc', 'Mobile', true);
+            });
+
+            $('#project_ADV_MON_IND').change(function () {
+                toggleDIV('#project_ADV_MON_IND option:selected', '#advmondesc', 'Advanced Monitoring', true);
+            });
+
+            $('#project_BP_MODERN_IND').change(function () {
+                toggleDIV('#project_BP_MODERN_IND option:selected', '#bpdesc', 'Process Modernization', true);
+            });
+
+            $('#project_COTS').change(function () {
+                toggleCOTS();
+            });
+
+            function toggleCOTS() {
+                if ($('#project_COTS option:selected').text() == 'COTS' || $('#project_COTS option:selected').text() == 'Modified COTS' || $('#project_COTS option:selected').text() == 'Custom Built by Vendor') {
+                    $('#cotsdesc').show();
+                }
+                else {
+                    $('#cotsdesc').hide();
+                }
+            }
+
+            function toggleDIV(a, b, c, d) {
+                if ($(a).text() == 'Yes: Major Component' || $(a).text() == 'Yes: Minor Component') {
+                    $(b).show();
+
+
+                    if (d == true) {
+                        var select = $('#SelectedFeatures');
+                        var option = $('<option></option>').
+                            attr('selected', true).
+                            text(c).
+                            val(c);
+                        option.appendTo(select);
+                        select.trigger('change');
+                    }
+                }
+                else {
+                    $(b).hide();
+                }
+            }
+        });
+       
+        function RemoveTextBox(button) {
+            $(button).parent().remove();
+        }
+       
+        function AddProjectURL() {
+            var m = $('#divurl input:last').attr('name');
+            var index = 0;
+            var indexnew = 0
+            if (m != null && m.length > 0) {
+                index = m.split('sProjectUrlList[')[1].replace('].PROJ_URL_DESC', '');
+                index++;
+            }
+
+            var html = '<span>'+
+                '<label for=\"sProjectUrlList' + index + '_Name\">URL</label>' +
+                '<input id=\"sProjectUrlList' + index + '_PROJECT_URL\" class=\"text-box single-line\"' +
+                ' type=\"text\" value=\"\" name=\"sProjectUrlList[' + index + '].PROJECT_URL\">' +
+
+                '<label for=\"sProjectUrlList' + index + '_DESC\">Description</label>' +
+                '<input id=\"sProjectUrlList' + index + '_PROJ_URL_DESC\" class=\"text-box single-line\"' +
+                ' type=\"text\" value=\"\" name=\"sProjectUrlList[' + index + '].PROJ_URL_DESC\">' +
+
+                '<a href="\#"\ onclick=\"RemoveTextBox(this)\">Remove</a>'+              
+                '<br/><br/></span>';
+
+
+            $('#divurl').append(html);
+
+        };
+    </script>
+}

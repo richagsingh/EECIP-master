@@ -1,0 +1,216 @@
+﻿@model EECIP.Models.vmDashboardGovernance
+@{
+    ViewBag.Title = "Governance Materials";
+    ViewBag.SubTitle = "Share project and materials created by E-Enterprise Governance or other active workgroups";
+    ViewBag.ShowTour = false;
+}
+
+@if (Model.UnlockedInd == false)
+{
+    <div class="row">
+        <div class="col-md-12">
+            <div class="alert alert-warning">
+                <p>
+                    If you participate in an E-Enterprise or Exchange Network related workgroup, you can share your progress and materials here. Click below to unlock this feature.
+                </p>
+                <br />
+                <p>
+                    @using (Html.BeginForm("GovernanceUnlock", "Dashboard", FormMethod.Post, new { @class = "" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <button type="submit" name="submitButton" value="Unlock Governance" class="btn btn-red btn-lg"><i class="clip-unlocked"></i> Unlock Governance</button>
+                    }
+                </p>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row">
+        <div class="col-sm-11">
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="form-field-1">
+                        Select Governance Group:
+                    </label>
+                    <div class="col-sm-9">
+                        <div class="input-group">
+                            @Html.DropDownListFor(model => model.selAgency, Model.ddl_Agencies, "", new { @class = "form-control", @onchange = "document.location.href = '/Dashboard/Governance?selAgency=' + this.options[this.selectedIndex].value;" })
+                            <span class="input-group-btn">
+                                <a href="#modal-form" data-toggle="modal" class="btn btn-info">
+                                    <i class="glyphicon glyphicon-plus"></i> Add New Group
+                                </a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+    if (Model.projects != null)
+    {
+
+        <div class="row">
+            <div class="col-sm-12">
+                <section class="panel panel-default">
+                    <div class="panel-heading">
+                        Projects
+                        <div class="panel-tools">
+                            <a class="btn btn-xs panel-collapse collapses" href="#">
+                            </a>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-responsive" style="max-height:700px;">
+                            <table class="table table-striped m-b-none" data-ride="datatables">
+                                <tr>
+                                    <th></th>
+                                    <th>Project Name</th>
+                                    <th>Description</th>
+                                    <th>Media</th>
+                                    <th>Start Year</th>
+                                    <th>Status</th>
+                                    <th>Record Source</th>
+                                    <th>Program Area</th>
+                                    <th>Features</th>
+                                    <th>More Info</th>
+                                </tr>
+
+
+                                @foreach (var item in Model.projects)
+                                {
+                                    <tr>
+                                        <td style="min-width: 68px;">
+                                            <a href="@Url.Action("ProjectDetails","Dashboard", new { id=item.PROJECT_IDX, orgIDX = Model.selAgency, returnURL="Governance" })" class="btn btn-rounded btn-xs btn-info"><i class="glyphicon glyphicon-pencil"></i></a>
+                                            <div class="delete-section" style="display:inline">
+                                                <a class=" btn btn-rounded btn-xs btn-danger delete-link"><i class="glyphicon glyphicon-remove"></i></a>
+                                                <div class="btn btn-rounded btn-xs btn-warning delete-confirm" style="display:none" data-delete-id="@item.PROJECT_IDX" data-delete-p="/Dashboard/ProjectsDelete"><b>Confirm Delete</b></div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.PROJ_NAME)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.PROJ_DESC)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.T_OE_REF_TAGS2.TAG_NAME)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.START_YEAR)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.PROJ_STATUS)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.RECORD_SOURCE)
+                                        </td>
+                                        <td>
+                                            @foreach (var subitem in item.T_OE_PROJECT_TAGS)
+                                            {
+                                                if (subitem.PROJECT_ATTRIBUTE == "Program Area")
+                                                {
+                                                    <span class="select2-selection__choice">@Html.DisplayFor(modelItem => subitem.PROJECT_TAG_NAME)</span>
+                                                }
+                                            }
+                                        </td>
+                                        <td>
+                                            @foreach (var subitem in item.T_OE_PROJECT_TAGS)
+                                            {
+                                                if (subitem.PROJECT_ATTRIBUTE == "Project Feature")
+                                                {
+                                                    <span class="select2-selection__choice">@Html.DisplayFor(modelItem => subitem.PROJECT_TAG_NAME)</span>
+                                                }
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (item.PROJECT_URL != null && item.PROJECT_URL.Length > 5)
+                                            {
+                                                <a href="@Html.DisplayFor(modelItem => item.PROJECT_URL)" target="_blank">Project URL</a>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    }
+
+    if (Model.selAgency != null)
+    {
+        <div class="col-md-1">
+            <a href="@Url.Action("ProjectDetails", "Dashboard", new { orgIDX = Model.selAgency, returnURL="Governance" })" class="btn btn-rounded  btn-rounded btn-success"><i class="glyphicon glyphicon-plus"></i> Add New Project</a>
+        </div>
+    }
+}
+
+
+<!-- START MODAL FORM  -->
+<div class="modal fade" id="modal-form" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog">
+        @using (Html.BeginForm("GovernanceOrgAdd", "Dashboard", FormMethod.Post, new { @class = "" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+                    <h3 class="modal-tital">New Governance Group</h3>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-12 ">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Governance Group Name</label>
+                                            @Html.TextBoxFor(model => model.edit_org_name, new { @class = "form-control", @maxlength = "200" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Abbreviation</label>
+                                            @Html.TextBoxFor(model => model.edit_org_abbr, new { @class = "form-control", @maxlength = "100" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="picLoc" type="submit" class="btn btn-sm btn-primary">Save</button>
+                    <button type="submit" class="btn btn-sm btn-default" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<!-- END MODAL FORM -->
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/confirmdelete")
+
+    <script src="https://cdn.getchaperone.com/embed/chaperone.js"></script>
+    <script type="text/javascript">
+        Chaperone.init({
+            "api_key": "lBuTEvIH43bg5g",
+            //"trigger": {
+            //    "element": "#btnTour",
+            //    "event": "click",
+            //    "tutorial": 4074
+            //}
+        });
+    </script>
+}
+

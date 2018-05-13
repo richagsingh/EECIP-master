@@ -1,0 +1,353 @@
+﻿@using EECIP.App_Logic.BusinessLogicLayer
+@model EECIP.Models.vmDashboardProjectCard
+@{
+    ViewBag.Title = Model.project.PROJ_NAME;
+    ViewBag.SubTitle = Model.OrgName;
+    ViewBag.ShowBack = true;
+}
+@if (Model.project != null)
+{
+
+<div class="row">
+    <section class="col-sm-6">
+        <section class="panel panel-default">
+            <div class="panel-heading">
+                Project Overview
+                <div class="panel-tools">
+                    <a class="btn btn-xs panel-collapse collapses" href="#">
+                    </a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <dl class="dl-horizontal">
+                    <dt>
+                        Start Year:
+                    </dt>
+                    <dd>
+                        @Model.project.START_YEAR
+                    </dd>
+                    <dt>
+                        Year Most Recently Active:
+                    </dt>
+                    <dd>
+                        @Model.project.DATE_LAST_UPDATE
+                    </dd>
+                    <dt>
+                        Current Status:
+                    </dt>
+                    <dd>
+                        @Model.project.PROJ_STATUS
+                    </dd>
+                    <dt>
+                        Record Source:
+                    </dt>
+                    <dd>
+                        @Model.project.RECORD_SOURCE
+                    </dd>
+                    <dt>
+                        Project URL:
+                    </dt>
+                    @*<dd id="projUrl">
+            @Model.project.PROJECT_URL
+        </dd>*@
+                    <dd>
+                        <table>
+
+                            @foreach (var pu in Model.sProjectUrlList)
+                            {
+                        <tr>
+                            <td>
+                                @* <div>@pu.PROJECT_URL</div>*@   
+                                <a href="@Html.Raw(Html.AttributeEncode(pu.PROJECT_URL))" title="@Html.Raw(Html.AttributeEncode(pu.PROJECT_URL))"> @Html.Raw(Html.AttributeEncode(pu.PROJECT_URL))</a>
+                              
+                            </td>
+                        </tr>
+                            }
+                        </table>
+                    </dd>
+                    <dt>
+                        Last Updated:
+                    </dt>
+                    <dd>
+                        @Model.LastUpdatedUser
+                        @(Model.project.MODIFY_DT ?? Model.project.CREATE_DT)
+                    </dd>
+                </dl>
+            </div>
+        </section>
+    </section>
+
+    <section class="col-sm-6">
+        <section class="panel panel-default">
+            <div class="panel-heading">
+                Project Overview
+                <div class="panel-tools">
+                    <a class="btn btn-xs panel-collapse collapses" href="#">
+                    </a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Media:</h4>
+                        @if (Model.project.T_OE_REF_TAGS2 != null)
+                        {
+                            <div class="select2-selection__choice">@Model.project.T_OE_REF_TAGS2.TAG_NAME</div>
+                        }
+
+
+                        <hr />
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Likes:</h4>
+                        <i class="glyphicon glyphicon-thumbs-up" style="font-size: 30px; color:forestgreen"></i>
+                        <span id="voteTotal" style="font-size: 24px; color:forestgreen">@Model.ProjectVotePoints</span>
+
+                        <br/>
+                        @if (!Model.HasVoted && !Model.UserBelongsToProjectAgency)
+                        {
+                            <a id="ProjectVoteUp" class="votelink" href="#" data-type="up">Like</a>
+                        }
+                        else if (Model.HasVoted) {
+                            <a id="ProjectVoteUp" class="votelink" href="#" data-type="removeup">Liked</a>
+                        }
+
+                    </div>
+                </div>
+                <h4>Program Area(s):</h4>
+                @foreach (string pa in Model.SelectedProgramAreas)
+                {
+                    <div class="select2-selection__choice">@pa</div>
+                }
+
+            </div>
+        </section>
+    </section>
+</div>
+
+
+<div class="row">
+    <section class="col-sm-6">
+        <section class="panel panel-default">
+            <div class="panel-heading">
+                Project Description
+                <div class="panel-tools">
+                    <a class="btn btn-xs panel-collapse collapses" href="#">
+                    </a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div id="desc">
+                    @Html.Raw(Model.project.PROJ_DESC)
+                </div>
+            </div>
+        </section>
+    </section>
+
+    <section class="col-sm-3">
+        <section class="panel panel-default">
+            <div class="panel-heading">
+                Project Contact
+                <div class="panel-tools">
+                    <a class="btn btn-xs panel-collapse collapses" href="#">
+                    </a>
+                </div>
+            </div>
+            <div class="panel-body">
+                @Model.project.PROJECT_CONTACT
+
+                @if (Model.project.PROJECT_CONTACT_IDX != null && Model.ProjectContact != null)
+                {
+                    <div class="col-lg-12">
+                        <div class="circle-tile">
+                            <a href="@Url.Action("UserCard", "Dashboard", new { strid = Model.project.PROJECT_CONTACT_IDX })">
+                                <div class="circle-tile-heading" style="background-image:url(/Content/Images/Users/@(Model.project.PROJECT_CONTACT_IDX).png)">
+                                </div>
+                            </a>
+                            <div class="circle-tile-content dark-blue">
+                                <div class="circle-tile-number text-faded">
+                                    @(Model.ProjectContact.FNAME) @(Model.ProjectContact.LNAME)
+                                </div>
+                                <div class="circle-tile-title text-faded">
+                                    @(Model.ProjectContact.JOB_TITLE)
+                                </div>
+                                <div class="circle-tile-buttons text-faded">
+                                    <a href="tel:@(Model.ProjectContact.PHONE)" class="btn btn-primary">
+                                        <i class="clip-phone"></i>
+                                    </a>
+                                    <a href="mailto:@(Model.ProjectContact.EMAIL)" class="btn btn-primary">
+                                        <i class="glyphicon glyphicon-envelope"></i>
+                                    </a>
+                                    <a href="https://www.linkedin.com/in/@(Model.ProjectContact.LINKEDIN)" class="btn btn-primary" target="_blank">
+                                        <i class="clip-linkedin"></i>
+                                    </a>
+                                </div>
+                                <a href="@Url.Action("UserCard", "Dashboard", new { strid = Model.project.PROJECT_CONTACT_IDX })" class="circle-tile-footer">More Info <i class="fa fa-chevron-circle-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+    </section>
+
+
+    <section class="col-sm-3">
+        <section class="panel panel-default">
+            <div class="panel-heading">
+                Project Files
+                <div class="panel-tools">
+                    <a class="btn btn-xs panel-collapse collapses" href="#">
+                    </a>
+                </div>
+            </div>
+            <div class="panel-body">
+                @if (Model.files_existing != null && Model.files_existing.Count > 0)
+                {
+                    <div class="postuploadedfilesholder clearfix">
+                        <p>Attached Files</p>
+                        <ul>
+                            @foreach (var file in Model.files_existing.OrderByDescending(o => o.CREATE_DT))
+                            {
+                            <li>
+                                <a class="fileupload" href="@Url.Action("ProjectFileDownload", "Dashboard", new { id = file.DOC_IDX })">
+                                    @if (Utils.FileIsImage(file.DOC_NAME))
+        {
+                            <span class="glyphicon glyphicon-picture" aria-hidden="true"></span>
+}
+else
+{
+                            <span class="glyphicon glyphicon-file" aria-hidden="true"></span>
+}
+                                </a>
+                                <div class="postedfilename">@file.DOC_NAME</div>
+                                <div >@file.DOC_COMMENT</div>
+                            </li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+            </div>
+        </section>
+    </section>
+</div>
+
+
+<div class="row">
+    <section class="col-sm-12">
+        <section class="panel panel-default">
+            <div class="panel-heading">
+                Project Details
+                <div class="panel-tools">
+                    <a class="btn btn-xs panel-collapse collapses" href="#">
+                    </a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <dl class="dl-horizontal">
+                    <dt style="width:30%">
+                        Project Tags:
+                    </dt>
+                    <dd>
+                        @foreach (string pa in Model.SelectedFeatures)
+                        {
+                            <div class="select2-selection__choice">@pa</div> 
+                        }
+                    </dd>
+                    <hr />
+                    <dt style="width:30%">
+                        Commercial Off the Shelf/In House:
+                    </dt>
+                    <dd>
+                        @Model.project.COTS
+                        @Model.project.VENDOR
+                    </dd>
+                    <dt style="width:30%">
+                        Business Process Modernization:
+                    </dt>
+                    <dd>
+                        @if (Model.project.T_OE_REF_TAGS1 != null)
+                        {
+                            @Model.project.T_OE_REF_TAGS1.TAG_NAME
+                        }
+                        @Model.project.BP_MODERN_DESC
+                    </dd>
+                    <dt style="width:30%">
+                        Is there a Mobile component?:
+                    </dt>
+                    <dd>
+                        @if (Model.project.T_OE_REF_TAGS3 != null)
+                        {
+                            @Model.project.T_OE_REF_TAGS3.TAG_NAME
+                        }
+                        @Model.project.MOBILE_DESC
+                    </dd>
+                    <dt style="width:30%">
+                        Involve Advanced Monitoring:
+                    </dt>
+                    <dd>
+                        @if (Model.project.T_OE_REF_TAGS != null)
+                        {
+                            @Model.project.T_OE_REF_TAGS.TAG_NAME
+                        }
+                        @Model.project.ADV_MON_DESC
+                    </dd>
+                </dl>
+            </div>
+        </section>
+    </section>
+</div>
+
+
+}
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/anchorme")
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        //automatically add links to description
+        $('#desc').html(anchorme($('#desc').text(), {}));
+        $('#projUrl').html(anchorme($('#projUrl').text(), {}));
+
+        //upvoting event handling
+        $("#ProjectVoteUp").click(function () {
+            //determine if upvoting or removing
+            var _typ = $(this).attr('data-type');
+
+            $.post('@Url.Action("ProjectVote", "Dashboard")',
+                AddAntiForgeryToken({ id: '@Model.project.PROJECT_IDX', typ: _typ }))
+                .done(function (response) {
+                    if (response.msg == "Success") {
+                        toastr.success("Thank you for voting!");
+                        $("#voteTotal").text(response.val);
+                        if (_typ == "up") {
+                            $("#ProjectVoteUp").text('Liked');
+                            $("#ProjectVoteUp").attr('data-type', 'removeup');
+                        }
+                        else {
+                            $("#ProjectVoteUp").text('Like');
+                            $("#ProjectVoteUp").attr('data-type', 'up');
+                        }
+                    }
+                    else {
+                        toastr.warning(response.msg);
+                    }
+
+                }).fail(function (data) {
+                    toastr.warning("Record cannot be deleted.");
+                });
+
+        });
+    });
+
+    AddAntiForgeryToken = function (data) {
+        data.__RequestVerificationToken = $('input[name=__RequestVerificationToken]').val();
+        return data;
+    };
+</script>
+}
+

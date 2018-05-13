@@ -1,0 +1,278 @@
+﻿@using EECIP.App_Logic.BusinessLogicLayer
+@model EECIP.Models.vmForumTopicView
+@{
+    ViewBag.Title = "Discussion Topic";
+    ViewBag.ShowBack = true;
+
+    string orderBy = "newest";
+    if (HttpContext.Current.Request.QueryString["order"] != null)
+    {   
+        orderBy = HttpContext.Current.Request.QueryString["order"].ToString();
+    }
+}
+
+<div class="row">
+    <div class="col-md-9">
+
+        <ul class="breadcrumb">
+            <li>
+                <a itemprop="url" href="/forum/"><span>Forum Home</span></a>
+            </li>
+            <li itemprop="child" class="active">
+                <span itemprop="title">@Html.Raw(Model.Topic.Name)</span>
+            </li>
+        </ul>
+
+
+        <div class="topicshow">
+            <div class="topicheading">
+                <div class="widgetright">
+                    @*@if (Model.IsSubscribed)
+                    {
+                        <a href="#" class="emailunsubscription" data-id="@Model.Topic.Id" data-type="topic">
+                            <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>Unsubscribe
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="#" class="emailsubscription" data-id="@Model.Topic.Id" data-type="topic">
+                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Subscribe
+                        </a>
+                    }*@
+                </div>
+                <h1 style="margin-top:0px">@Html.Raw(Model.Topic.Name)</h1>
+                <ul class="topicinfo">
+                    @if (Model.Topic.IsSticky)
+                    {
+                        <li><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> Topic Is Sticky</li>
+                    }
+                    @if (Model.Topic.IsLocked)
+                    {
+                        <li><span class="glyphicon glyphicon-lock" aria-hidden="true"></span> Topic Is Locked</li>
+                    }
+
+                    @if (Model.Topic.Poll != null)
+                    {
+                        <li>
+                            <span class="glyphicon glyphicon-align-left" aria-hidden="true"></span> Poll
+                            @if (Model.Topic.Poll.IsClosed)
+                            {
+                                <text>Closed</text>
+                            }
+                        </li>
+                    }
+                    <li><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> @Model.Views Views</li>
+                    <li><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Last Post @Model.LastPostDatePretty</li>
+
+                    @if (Model.Topic.Solved)
+                    {
+                        <li class="text-green text-bold"><span class="glyphicon glyphicon-ok text-green" aria-hidden="true"></span> Topic Is Solved</li>
+                    }
+
+                </ul>
+
+            </div>
+
+            <div class="topicstarterpost">
+                @if (Model.StarterPost != null)
+                {
+                    Html.RenderPartial("_Post", Model.StarterPost);
+                }
+
+                <div class="posttags tagsinput">
+                    @foreach (var tag in Model.TopicTags)
+                    {
+                        <span class="tag"><span><a href="@Url.Action("Index", "Forum", new { tag = tag })">@Html.Raw(tag)</a></span></span>
+                    }
+                </div>
+
+                <div class="row topicstarterpostbeginpostsheading">
+                    <div class="col-md-8 hidden-xs topicstarterpostcomments">
+                        @(Model.Posts != null ? Model.Posts.Count() : 0) Comments
+                    </div>
+                    <div class="col-md-4 topicpostorderfilter">
+                        @if (Model.Posts != null && Model.Posts.Count() > 1)
+                        {
+                            <text> Order By:
+                                <a href="@Url.Action("ShowTopic", "Forum", new { slug = Model.Topic.Slug, order="newest" })" class="@(orderBy=="votes" ? "" : "text-bold")">Newest First</a> |
+                                <a href="@Url.Action("ShowTopic", "Forum", new { slug = Model.Topic.Slug, order="votes" })" class="@(orderBy=="votes" ? "text-bold" : "")">Votes</a>
+                            </text>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            @if (Model.Posts != null) {
+                foreach (var post in Model.Posts)
+                {
+                    Html.RenderPartial("_Post", post);
+                }
+            }
+
+            @if (!Model.Topic.IsLocked)
+            {
+                <span id="newpostmarker"></span>
+                <div id="createpostholder">
+                    @using (Ajax.BeginForm("CreatePost", "Forum", null, new AjaxOptions
+                    {
+                        HttpMethod = "POST",
+                        LoadingElementId = "createpostwait",
+                        OnSuccess = "AjaxPostSuccess()",
+                        OnFailure = "AjaxPostError('Error creating post')",
+                        UpdateTargetId = "newpostmarker",
+                        OnBegin = "AjaxPostBegin()"
+                    }, new { @id = "postcodeform" }))
+                    {
+                        <div class="editorholder">
+                            @Html.EditorFor(x => x.NewPostContent)
+                            @*@Html.EditorFor(x => x.NewPostContent, new { @class = "createpost required form-control rte" })*@
+                            @Html.ValidationMessageFor(x => x.NewPostContent)
+                        </div>
+                        <input type="submit" id="createpostbutton" class="btn btn-success btn-lg " value="Add Post" style="margin-top:10px;" />
+                        <span style="display: none;" id="createpostwait" class="ajaxspinner" title="Please Wait">Please Wait</span>
+                        @Html.HiddenFor(x => x.Topic.Id)
+                        @Html.HiddenFor(x => x.Topic.Slug)
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="topiclockedmessage">Topic Is Locked</p>
+            }
+
+        </div>
+    </div>
+
+    @Html.Partial("_CommonSideNav")
+</div>
+
+
+@section Scripts {
+<script type="text/javascript">
+    $(document).ready(function () {
+
+
+        //upload file handling
+        $(function () {
+            ShowFileUploadClickHandler();
+        });
+
+        var ShowFileUploadClickHandler = function () {
+            var attachButton = $(".postshowattach");
+            if (attachButton.length > 0) {
+                attachButton.click(function (e) {
+                    e.preventDefault();
+                    var postHolder = $(this).closest("div.post");
+                    var uploadHolder = postHolder.find("div.postuploadholder");
+                    uploadHolder.toggle();
+                });
+            }
+        }
+
+        //file upload display filename
+        $("input[id='files']").change(function (e) {                       
+            var $this = $(this);
+            var FileSize = this.files[0].size / 1024 / 1024;
+            if (FileSize > 20) {
+                $('#files').val('');
+                alert('Project files cannot exceed 20 MB');
+            }
+            else {
+                $("#filename1").val($this.val().split('\\').pop());
+            }
+        });
+
+
+        //upvoting event handling
+        $(".votelink").on('click', function (e) {
+            e.preventDefault();
+            //determine if upvoting or removing
+            var _typ = $(this).attr('data-type');
+            var _id = $(this).attr('data-id');
+            var linker = $(this);
+
+            $.post('@Url.Action("PostVote", "Forum")',
+            AddAntiForgeryToken({ id: _id, typ: _typ }))
+
+                .done(function (response) {
+                    if (response.msg == "Success") {
+                        linker.parent().children('span').eq(1).text(response.val);
+                        if (_typ == "up") {
+                            toastr.success("Thank you for voting!");
+                            linker.text('Liked');
+                            linker.attr('data-type', 'removeup');
+                        }
+                        else if (_typ == "removeup") {
+                            toastr.success("Vote removed");
+                            linker.text('Like');
+                            linker.attr('data-type', 'up');
+                        }
+                        else if (_typ == "down") {
+                            toastr.success("Thank you for voting!");
+                            linker.text('Disliked');
+                            linker.attr('data-type', 'removedown');
+                        }
+                        else if (_typ == "removedown") {
+                            toastr.success("Vote removed");
+                            linker.text('Dislike');
+                            linker.attr('data-type', 'down');
+                        }
+                    }
+                    else {
+                        toastr.warning(response.msg);
+                    }
+                }).fail(function (data) {
+                    toastr.warning("Unable to record vote.");
+                });
+
+        });
+
+
+            
+        //answer event handling
+        $(".solutionlink").on('click', function (e) {
+            e.preventDefault();
+            //determine if answering or removing answer
+            var _typ = $(this).attr('data-type');
+            var _id = $(this).attr('data-id');
+            var linker = $(this);
+
+            $.post('@Url.Action("PostAnswer", "Forum")',
+            AddAntiForgeryToken({ id: _id, typ: _typ }))
+
+                .done(function (response) {
+                    if (response.msg == "Success") {
+                        if (_typ == "answer") {
+                            toastr.success("Thank you for voting!");
+                            linker.text('Solution');
+                            linker.attr('data-type', 'removeanswer');
+                            linker.addClass("solution");
+                            linker.prev().removeClass('glyphicon-question-sign');
+                            linker.prev().addClass('glyphicon-ok text-green');
+                        }
+                        else if (_typ == "removeanswer") {
+                            toastr.success("Vote removed");
+                            linker.text('Mark As Solution');
+                            linker.attr('data-type', 'answer');
+                            linker.removeClass("solution");
+                            linker.prev().addClass('glyphicon-question-sign');
+                            linker.prev().removeClass('glyphicon-ok text-green');
+                        }
+                    }
+                    else {
+                        toastr.warning(response.msg);
+                    }
+                }).fail(function (data) {
+                    toastr.warning("Unable to record vote.");
+                });
+
+        });
+
+    });
+
+    AddAntiForgeryToken = function (data) {
+        data.__RequestVerificationToken = $('input[name=__RequestVerificationToken]').val();
+        return data;
+    };
+</script>
+}

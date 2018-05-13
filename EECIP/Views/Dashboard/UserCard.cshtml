@@ -1,0 +1,106 @@
+﻿@using EECIP.App_Logic.DataAccessLayer
+@model EECIP.Models.vmDashboardUserCard
+@{
+    if (Model.User != null)
+    {
+        ViewBag.Title = Model.User.FNAME + " " + Model.User.LNAME;
+    }
+    ViewBag.ShowBack = true;
+}
+
+<div class="row">
+    <div class="col-lg-4 col-sm-6">
+        <div class="circle-tile">
+            <div class="circle-tile-heading" style="background-image:url(/Content/Images/Users/@(Model.User.USER_IDX).png)">
+            </div>
+            <div class="circle-tile-content dark-blue">
+                <div class="circle-tile-description text-faded">
+                    @if (Model.UserOrg != null)
+                    {
+                        @Model.UserOrg.ORG_NAME
+                    }
+                </div>
+                <div class="circle-tile-number text-faded">
+                    @Model.User.FNAME @Model.User.LNAME
+                </div>
+                <div class="circle-tile-title text-faded">
+                    @Model.User.JOB_TITLE
+                </div>
+                <div class="circle-tile-buttons text-faded">
+                    <a href="tel:@(Model.User.PHONE)" class="btn btn-primary">
+                        <i class="clip-phone"></i>
+                    </a>
+                    <a href="mailto:@(Model.User.EMAIL)" class="btn btn-primary">
+                        <i class="glyphicon glyphicon-envelope"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/in/@(Model.User.LINKEDIN)" class="btn btn-primary" target="_blank">
+                        <i class="clip-linkedin"></i>
+                    </a>
+                </div>
+                <br />
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <section class="panel panel-default" style="margin-top: 40px;">
+            <div class="panel-heading">
+                Expertise
+                <div class="panel-tools">
+                    <a class="btn btn-xs panel-collapse collapses" href="#">
+                    </a>
+                </div>
+            </div>
+            <div class="panel-body">
+                @foreach (var item in Model.SelectedExpertise)
+                {
+                    <span class="select2-selection__choice">@Html.DisplayFor(modelItem => item)</span>
+                }
+                <br />
+                <br />
+                <div class="form-group">
+                    @Html.CheckBoxFor(model => model.User.NODE_ADMIN, new { @class = "" })
+                    <label>Node Administrator</label>
+                </div>
+                <br />
+            </div>
+        </section>
+    </div>
+    @if(!Model.User.EXCLUDE_POINTS_IND)
+    {
+    <div class="col-lg-4">
+        <section class="panel panel-default" style="margin-top: 40px;">
+            <div class="panel-heading">
+                Badges Earned
+                <div class="panel-tools">
+                    <a class="btn btn-xs panel-collapse collapses" href="#">
+                    </a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="badgeholder">
+                    <div class="publicbadgeline" style="width:100%">
+                        @foreach (UserBadgeDisplay item in Model.UserBadges)
+                        {
+                            <div class="publicbadge col-md-4 col-sm-4 tooltips col-xs-6" data-original-title="@item._Badge.Description">
+                                <img src="/Content/Images/badges/@(item._Badge.Image)" alt="@item._Badge.DisplayName" class="@(item.UserEarnedInd ? "fff" : "grey")">
+                                <p class="publicbadgenamedesc">@item._Badge.DisplayName</p>
+                                <p class="publicbadgeawards" style="color:green"><b>Awarded @(item.EarnedDate.HasValue ? item.EarnedDate.Value.ToShortDateString() : "")</b></p>
+                            </div>
+                        }
+                    </div>
+
+                </div>
+
+
+            </div>
+        </section>
+    </div>
+    }
+</div>
+
+
+@*<div class="row">
+    <div class="col-sm-12">
+        <h4>Latest Activity</h4>
+    </div>
+</div>*@

@@ -1,0 +1,51 @@
+﻿@model EECIP.Models.vmForumTopicCreate
+@{
+    ViewBag.Title = "Create Discussion";
+}
+
+<div class="row">
+
+    <div class="col-md-8 col-md-offset-2">
+        <div class="createtopicholder">
+
+            @using (Html.BeginForm("Create", "Forum", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                @Html.ValidationSummary(false)
+                @Html.AntiForgeryToken()
+                @Html.Partial("CreateEdit_TopicPost", Model)
+            }
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/select2")
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            //function to initiate Select2
+            $(".search-select").select2({
+                placeholder: "",
+                allowClear: true,
+                tags: true,
+                width: ''
+            });
+
+
+            //file upload display filename
+            $("input[id='files']").change(function (e) {
+                var $this = $(this);
+                var FileSize = this.files[0].size / 1024 / 1024;
+                if (FileSize > 20) {
+                    $('#files').val('');
+                    alert('Project files cannot exceed 20 MB');
+                }
+                else {
+                    $("#filename1").val($this.val().split('\\').pop());
+                }
+            });
+        });
+
+    </script>
+}

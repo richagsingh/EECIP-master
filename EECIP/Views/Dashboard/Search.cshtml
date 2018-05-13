@@ -1,0 +1,621 @@
+﻿@using EECIP.App_Logic.BusinessLogicLayer;
+@model EECIP.Models.vmDashboardSearch
+@{
+    ViewBag.HideTitle = true;
+    ViewBag.Title = "Browse or Search Content";
+    ViewBag.SubTitle = @"Find projects, agencies, people, or discussions that match your interests  (You can use "" and -  and + to refine your search)";
+    int counter = 1;
+}
+
+@using (Html.BeginForm("Search", "Dashboard", FormMethod.Get, new { @id = "norepostform" }))
+{
+
+    <!-- start: PAGE TITLE  -->
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="page-header">
+                <h1 style="float: left; margin-right: 20px;">@ViewBag.Title</h1>
+                <div class="input-group">
+                    <span class="input-group-btn">
+                        <a id="clearSearch" href="#" class="btn btn-danger" style="display:none">
+                            <span class="glyphicon glyphicon-remove"></span>
+                        </a>
+                    </span>
+                    @Html.TextBoxFor(model => model.q, new { @class = "form-control", @id = "txtSearch", @name = "txtSearch", @placeholder = @ViewBag.SubTitle })
+                    <span class="input-group-btn">
+                        <button class="btn btn-success" type="submit">
+                            <i class="clip-search-2"> </i>Search
+                        </button>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end: PAGE TITLE -->
+
+
+    @Html.HiddenFor(model => model.facetDataType)
+    @Html.HiddenFor(model => model.facetMedia)
+    @Html.HiddenFor(model => model.facetRecordSource)
+    @Html.HiddenFor(model => model.facetAgency)
+    @Html.HiddenFor(model => model.facetState)
+    @Html.HiddenFor(model => model.facetTags)
+    @Html.HiddenFor(model => model.facetPopDensity)
+    @Html.HiddenFor(model => model.facetRegion)
+    @Html.HiddenFor(model => model.facetStatus)
+    @Html.HiddenFor(model => model.activeTab)
+    @Html.HiddenFor(model => model.currentPage)
+    @Html.HiddenFor(model => model.sortType)
+
+
+    <div class="row">
+
+        <!-- ******************************* LEFT PANEL FACETS **********************************-->
+        @if (Model.searchResults != null)
+        {
+            <div id="leftFacets" class="col-sm-2" style="border-right-width:1px; border-right-style:solid; border-color:#ccc; min-height:500px; ">
+                <div>
+                    <h3 style="margin-top:0px;">Data Filters</h3>
+                    @{
+
+                        foreach (var item in Model.searchResults.Facets)
+                        {
+                            if (item.Key != "DataType")
+                            {
+                                if (item.Value.Count > 0)
+                                {
+                                    <div class="collapse-chevron">
+                                        <div class="facetHead" data-toggle="collapse" data-target="#facetItemContainer@(counter)">
+                                            <span class="glyphicon glyphicon-chevron-down"></span>
+                                            @Html.DisplayFor(modelItem => item.Key).ToString().Replace("_", " ")
+                                        </div>
+                                        <div id="facetItemContainer@(counter)" class="facContainter collaspe in facetItemContainer@(counter)">
+                                            @foreach (var subitem in item.Value)
+                                            {
+                                                if (!string.IsNullOrEmpty(subitem.Value.ToString().Trim()))
+                                                {
+                                                    if (!string.IsNullOrEmpty(@Model.facetState) && (item.Key == "State_or_Tribal"))
+                                                    {
+                                                        @Html.DisplayFor(modelItem => subitem.Value) <span class="tag" style="margin-left:15px"><a href="javascript:void(0)" data-id2="State_or_Tribal" class="removeFacet">X Remove Filter</a></span>
+                                                    }
+                                                    else if (!string.IsNullOrEmpty(Model.facetAgency) && (item.Key == "Agency"))
+                                                    {
+                                                        @Html.DisplayFor(modelItem => subitem.Value) <span class="tag" style="margin-left:15px"><a href="javascript:void(0)" data-id2="Agency" class="removeFacet">X Remove Filter</a></span>
+                                                    }
+                                                    else if (!string.IsNullOrEmpty(Model.facetMedia) && (item.Key == "Media"))
+                                                    {
+                                                        @Html.DisplayFor(modelItem => subitem.Value) <span class="tag" style="margin-left:15px;"><a href="javascript:void(0)" data-id2="Media" class="removeFacet">X Remove Filters</a></span>
+                                                    }
+                                                    else if (!string.IsNullOrEmpty(Model.facetRecordSource) && (item.Key == "Record_Source"))
+                                                    {
+                                                        @Html.DisplayFor(modelItem => subitem.Value) <span class="tag" style="margin-left:15px"><a href="javascript:void(0)" data-id2="Record_Source" class="removeFacet">X Remove Filter</a></span>
+                                                    }
+                                                    else if (!string.IsNullOrEmpty(Model.facetTags) && (item.Key == "Tags") && (Model.facetTags == subitem.Value.ToString()))
+                                                    {
+                                                        @Html.DisplayFor(modelItem => subitem.Value) <span class="tag" style="margin-left:15px"><a href="javascript:void(0)" data-id2="Tags" class="removeFacet">X Remove Filter </a></span>
+                                                    }
+                                                    else if (!string.IsNullOrEmpty(Model.facetPopDensity) && (item.Key == "Population_Density"))
+                                                    {
+                                                        @Html.DisplayFor(modelItem => subitem.Value) <span class="tag" style="margin-left:15px"><a href="javascript:void(0)" data-id2="Population_Density" class="removeFacet">X Remove Filter</a></span>
+                                                    }
+                                                    else if (!string.IsNullOrEmpty(Model.facetRegion) && (item.Key == "EPA_Region"))
+                                                    {
+                                                        @Html.DisplayFor(modelItem => subitem.Value) <span class="tag" style="margin-left:15px"><a href="javascript:void(0)" data-id2="EPA_Region" class="removeFacet">X Remove Filter</a></span>
+                                                    }
+                                                    else if (!string.IsNullOrEmpty(Model.facetStatus) && (item.Key == "Status"))
+                                                    {
+                                                        @Html.DisplayFor(modelItem => subitem.Value) <span class="tag" style="margin-left:15px"><a href="javascript:void(0)" data-id2="Status" class="removeFacet">X Remove Filter</a></span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a id="@Html.DisplayFor(modelItem => subitem.Value)" class="facetItem" data-id2="Facet" href="@Html.DisplayFor(modelItem => item.Key)"><i class="clip-chevron-left"></i> @Html.DisplayFor(modelItem => subitem.Value) (@Html.DisplayFor(modelItem => subitem.Count))</a>
+                                                    }
+
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            counter++;
+                        }
+                    }
+                </div>
+            </div>
+        }
+        <!-- ******************************* END LEFT PANEL FACETS **********************************-->
+
+
+
+
+        <div id="job_details_div" class="@(Model.searchResults != null ? @Html.Raw("col-sm-10") : @Html.Raw("col-sm-12"))">
+
+            <!-- *********************** START TABS ****************************************** -->
+            <div id="tabs" class="tabbable">
+                <ul id="myTab" class="nav nav-tabs tab-blue">
+                    <li><a href="#tab1" data-toggle="tab">All</a></li>
+                    <li>
+                        <a href="#tab2" data-toggle="tab">
+                            Projects
+                            @if (Model.searchResults != null && Model.searchResults.Facets != null && Model.searchResults.Facets.FirstOrDefault(c => c.Key == "DataType").Value.FirstOrDefault(d => d.Value.ToString() == "Project") != null)
+                            {
+                                <span class="badge badge-eecip-bluegreen">@Model.searchResults.Facets.FirstOrDefault(c => c.Key == "DataType").Value.FirstOrDefault(d => d.Value.ToString() == "Project").Count</span>
+                            }
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#tab3" data-toggle="tab">
+                            <i id="entHelp" class="clip-question-2 help-icon"></i>
+                            Enterprise Services
+                            @if (Model.searchResults != null && Model.searchResults.Facets != null && Model.searchResults.Facets.FirstOrDefault(c => c.Key == "DataType").Value.FirstOrDefault(d => d.Value.ToString() == "Enterprise Service") != null)
+                            {
+                                <span class="badge badge-eecip-bluegreen">@Model.searchResults.Facets.FirstOrDefault(c => c.Key == "DataType").Value.FirstOrDefault(d => d.Value.ToString() == "Enterprise Service").Count</span>
+                            }
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#tab4" data-toggle="tab">
+                            People
+                            @if (Model.searchResults != null && Model.searchResults.Facets != null && Model.searchResults.Facets.FirstOrDefault(c => c.Key == "DataType").Value.FirstOrDefault(d => d.Value.ToString() == "User") != null)
+                            {
+                                <span class="badge badge-eecip-bluegreen">@Model.searchResults.Facets.FirstOrDefault(c => c.Key == "DataType").Value.FirstOrDefault(d => d.Value.ToString() == "User").Count</span>
+                            }
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#tab5" data-toggle="tab">
+                            Agencies
+                            @if (Model.searchResults != null && Model.searchResults.Facets != null && Model.searchResults.Facets.FirstOrDefault(c => c.Key == "DataType").Value.FirstOrDefault(d => d.Value.ToString() == "Agency") != null)
+                            {
+                                <span class="badge badge-eecip-bluegreen">@Model.searchResults.Facets.FirstOrDefault(c => c.Key == "DataType").Value.FirstOrDefault(d => d.Value.ToString() == "Agency").Count</span>
+                            }
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#tab6" data-toggle="tab">
+                            Governance
+                            @if (Model.searchResults != null && Model.searchResults.Facets != null && Model.searchResults.Facets.FirstOrDefault(c => c.Key == "DataType").Value.FirstOrDefault(d => d.Value.ToString() == "Governance") != null)
+                            {
+                                <span class="badge badge-eecip-bluegreen">@Model.searchResults.Facets.FirstOrDefault(c => c.Key == "DataType").Value.FirstOrDefault(d => d.Value.ToString() == "Governance").Count</span>
+                            }
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#tab7" data-toggle="tab">
+                            Discussion
+                            @if (Model.searchResults != null && Model.searchResults.Facets != null && Model.searchResults.Facets.FirstOrDefault(c => c.Key == "DataType").Value.FirstOrDefault(d => d.Value.ToString() == "Discussion") != null)
+                            {
+                                <span class="badge badge-eecip-bluegreen">@Model.searchResults.Facets.FirstOrDefault(c => c.Key == "DataType").Value.FirstOrDefault(d => d.Value.ToString() == "Discussion").Count</span>
+                            }
+                        </a>
+                    </li>
+                    <li class="pull-right"><a href="#" style="background-color: #FFF; border: 0px; font-weight: bold; font-size: 11px;">Record Count: @(Model.searchResults != null ? Model.searchResults.Count : 0)</a></li>
+                </ul>
+                <div class="tab-content" style="height:0px; padding: 0px;">
+                    <div class="tab-pane in active" id="tab1">
+                        <!--  ************************************** TAB 1 CONTENT *********************************************************-->
+                    </div>
+                    <div class="tab-pane" id="tab2">
+                    </div>
+                    <div class="tab-pane" id="tab3">
+                    </div>
+                    <div class="tab-pane" id="tab4">
+                    </div>
+                    <div class="tab-pane" id="tab5">
+                    </div>
+                    <div class="tab-pane" id="tab6">
+                    </div>
+                </div>
+            </div>
+            <!-- *********************** END TABS ****************************************** -->
+
+
+            @if (Model.searchResults != null)
+            {
+                if (Model.activeTab != "4")
+                {
+
+                    <div class="table-responsive">
+                        <table class="table table-striped m-b-none" data-ride="datatables">
+                            <tr>
+                                <th>Type</th>
+                                <th>Agency</th>
+                                @if (Model.activeTab != "5")
+                                {
+                                    <th>Name</th>
+                                }
+                                <th>Description</th>
+                                @if (Model.activeTab != "5" && Model.activeTab != "7")
+                                {
+                                    <th>Record Source</th>
+                                    <th>Media</th>
+                                    <th>Status</th>
+                                }
+                                <th>Tags</th>
+                            </tr>
+
+                            @foreach (var item in Model.searchResults.Results)
+                            {
+                                <tr>
+                                    <td>
+                                        @if (item.Document.DataType == "Project")
+                                        {
+                                            <a href="@Url.Action("ProjectCard", "Dashboard", new { strid = item.Document.KeyID })" class="label label-success btn-lg" style="padding-top:15px !important; padding-bottom: 15px !important; padding-left: 5px !important; padding-right: 5px !important; display:inline-block; width:65px;"><i class="clip-info"></i> Project</a>
+                                        }
+                                        @if (item.Document.DataType == "Agency")
+                                        {
+                                            <a href="@Url.Action("AgencyCard", "Dashboard", new { strid = item.Document.KeyID })" class="label label-primary btn-lg" style="padding-top:15px !important; padding-bottom: 15px !important; padding-left: 5px !important; padding-right: 5px !important; display:inline-block; width:70px;"><i class="clip-users-3"></i> Agency</a>
+                                        }
+                                        @if (item.Document.DataType == "Enterprise Service")
+                                        {
+                                            <a href="@Url.Action("EnterpriseSvcCard", "Dashboard", new { strid = item.Document.KeyID })" class="label label-danger" style="padding-top:15px !important; padding-bottom: 15px !important; padding-left: 5px !important; padding-right: 5px !important; display:inline-block; width:65px;">Enterprise <br />Service</a>
+                                        }
+                                        @if (item.Document.DataType == "User")
+                                        {
+                                            <a href="@Url.Action("UserCard", "Dashboard", new { strid = item.Document.KeyID })" class="label label-yellow" style="padding-top:15px !important; padding-bottom: 15px !important; padding-left: 5px !important; padding-right: 5px !important; display:inline-block; width:65px;"><i class="clip-user"></i> Person</a>
+                                        }
+                                        @if (item.Document.DataType == "Discussion")
+                                        {
+                                            <a href="@Url.Action("ShowTopic", "Forum", new { id = item.Document.KeyID })" class="label label-purple" style="padding-top:15px !important; padding-bottom: 15px !important; padding-left: 5px !important; padding-right: 5px !important; display:inline-block; width:65px;">Discussion</a>
+                                        }
+                                        @if (item.Document.DataType == "Governance")
+                                        {
+                                            <a href="@Url.Action("ProjectCard", "Dashboard", new { strid = item.Document.KeyID })" class="label label-beige" style="padding-top:15px !important; padding-bottom: 15px !important; padding-left: 5px !important; padding-right: 5px !important; display:inline-block; width:70px;">Governance <br />Project</a>
+                                        }
+                                        @if (User.IsInRole("Admins"))
+                                        {
+                                            <span style="font-weight: bold; font-size: 11px;display:block;">Score: @Html.DisplayFor(modelItem => item.Score).ToString().SubStringPlus(0, 5)</span>
+                                            <span style="font-weight: bold; font-size: 11px;display:block;">Updated: @Html.DisplayFor(modelItem => item.Document.LastUpdated).ToString()</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Document.Agency)
+                                    </td>
+                                    @if (Model.activeTab != "5")
+                                    {
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Document.Name)
+                                        </td>
+                                    }
+                                    <td>
+                                        @if (item.Document.DataType != "Discussion")
+                                        {
+                                            <span class="resDesc">
+                                                @Html.DisplayFor(modelItem => item.Document.Description)
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="resDesc">
+                                                @Utils.ReturnAmountWordsFromString(Utils.StripHtmlFromString(item.Document.Description), 50)
+                                            </span>
+                                        }
+                                    </td>
+                                    @if (Model.activeTab != "5" && Model.activeTab != "7")
+                                    {
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Document.Record_Source)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Document.Media)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Document.Status)
+                                        </td>
+                                    }
+                                    <td>
+                                        @foreach (string tag in item.Document.Tags)
+                                        {
+                                            <span class="select2-selection__choice">@Html.DisplayFor(modelItem => tag)</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </table>
+
+                        @if (Model.searchResults.Count > 50)
+                        {
+                            <ul class="pagination" id="pagination" style="margin:0px"></ul>
+                        }
+
+                    </div>
+                }
+                else
+                {
+                    <!-- ************** PEOPLE ****************************-->
+                    <div class="table-responsive">
+                        <table class="table table-striped m-b-none" data-ride="datatables">
+                            <tr>
+                                <th></th>
+                                <th>Contact</th>
+                                <th>Name</th>
+                                <th>Agency</th>
+                                <th>Title</th>
+                                <th>Expertise/Interest</th>
+                            </tr>
+
+                            @foreach (var item in Model.searchResults.Results)
+                            {
+                                <tr>
+                                    <td>
+                                        <a href="@Url.Action("UserCard", "Dashboard", new { strid = item.Document.KeyID })">
+                                            <div class="circle-tile-heading" style="display:inline-grid; background-image:url(/Content/Images/Users/@(item.Document.KeyID).png)">
+                                            </div>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        @if (item.Document.PersonPhone != null && item.Document.PersonPhone.Length > 5)
+                                        {
+                                            <a href="tel:@(item.Document.PersonPhone)" class="btn btn-xs btn-info" style="margin-bottom: 4px;">
+                                                <i class="clip-phone"></i>
+                                            </a>
+                                        }
+                                        <a href="mailto:@(item.Document.PersonEmail)" class="btn btn-xs btn-info" style="margin-bottom: 4px;">
+                                            <i class="glyphicon glyphicon-envelope"></i>
+                                        </a>
+                                        @if (item.Document.PersonLinkedIn != null && item.Document.PersonLinkedIn.Length > 5)
+                                        {
+                                            <a href="https://www.linkedin.com/in/@(item.Document.PersonLinkedIn)" class="btn btn-xs btn-info" style="margin-bottom: 4px;" target="_blank">
+                                                <i class="clip-linkedin"></i>
+                                            </a>
+                                        }
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Document.Name)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Document.Agency)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Document.Description)
+                                    </td>
+                                    <td>
+                                        @foreach (string tag in item.Document.Tags)
+                                        {
+                                            <span class="tag">@Html.DisplayFor(modelItem => tag)</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </table>
+
+                        @if (Model.searchResults.Count > 50)
+                        {
+                            <ul class="pagination" id="pagination" style="margin:0px"></ul>
+                        }
+
+                    </div>
+
+                }
+            }
+
+        </div>
+    </div>
+}
+@section Scripts {
+    @Scripts.Render("~/bundles/autocomplete")
+    @Scripts.Render("~/bundles/pagination")
+    @Scripts.Render("~/bundles/trunk8")
+    <script src="https://cdn.getchaperone.com/embed/chaperone.js"></script>
+    <script>
+        Chaperone.init({
+            "api_key": "lBuTEvIH43bg5g"
+        });
+    </script>
+
+    <script type="text/javascript">
+
+        //truncate long text
+        $('.resDesc').trunk8({
+            lines: 4,
+            fill: '&hellip; <a id="read-more" href="#">read more</a>'
+        });
+
+        $(document).on('click', '#read-more', function (event) {
+            $(this).parent().trunk8('revert').append(' <a id="read-less" href="#">read less</a>');
+            return false;
+        });
+
+        $(document).on('click', '#read-less', function (event) {
+            $(this).parent().trunk8();
+            return false;
+        });
+
+        //pagination
+        $(function () {
+            var _totalRec = @(Model.searchResults != null ? Model.searchResults.Count : 1);
+            var _totalPages = Math.round(_totalRec / 50) + 1;
+            var obj = $('#pagination').twbsPagination({
+                totalPages: _totalPages,
+                visiblePages: 10,
+                startPage: @Model.currentPage});
+        });
+
+        $(document).ready(function () {
+            //focus on search bar
+            $('#txtSearch').focus();
+
+            //make left small
+            //if ($("#txtSearch").val().length > 0) {
+                $('body').addClass("navigation-small");
+            //}
+
+            //autocomplete
+            new autoComplete({
+                selector: 'input[name="q"]',
+                source: function (term, response) {
+                    $.getJSON('/Admin/SearchAdminSuggest/', { term: term }, function (data) { response(data); });
+                },
+                onSelect: function (e, term, item) {
+                    $("#txtSearch").val('"' + term + '"');
+                    console.log('f');
+                }
+            });
+
+
+            //tab handling
+            var EntUrl = '@Url.Action("EnterpriseSvcOverview", "Dashboard")';
+            $('#entHelp').on("click", function () {
+                window.location = EntUrl;
+            });
+
+            $('.nav-tabs a[href="#tab' + $('#activeTab').val() + '"]').tab('show');             //do proper tab display from postback
+
+            $('a[href="#tab1"]').on('shown.bs.tab', function (e) {
+                $('#facetDataType').val('');
+                $('#facetState').val('');
+                $('#activeTab').val('1');
+                $('#currentPage').val(1);
+                $('#norepostform').submit();
+            });
+
+            $('a[href="#tab2"]').on('shown.bs.tab', function (e) {
+                $('#facetDataType').val('Project');
+                $('#facetState').val('');
+                $('#activeTab').val('2');
+                $('#currentPage').val(1);
+                $('#norepostform').submit();
+            });
+
+            $('a[href="#tab3"]').on('shown.bs.tab', function (e) {
+                $('#facetDataType').val('Enterprise Service');
+                $('#facetState').val('');
+                $('#activeTab').val('3');
+                $('#currentPage').val(1);
+                $('#norepostform').submit();
+            });
+
+            $('a[href="#tab4"]').on('shown.bs.tab', function (e) {
+                $('#facetDataType').val('User');
+                $('#facetState').val('');
+                $('#activeTab').val('4');
+                $('#currentPage').val(1);
+                $('#sortType').val('alpha');
+                $('#norepostform').submit();
+            });
+
+            $('a[href="#tab5"]').on('shown.bs.tab', function (e) {
+                $('#facetDataType').val('Agency');
+                $('#facetState').val('');
+                $('#activeTab').val('5');
+                $('#currentPage').val(1);
+                $('#sortType').val('alpha');
+                $('#norepostform').submit();
+            });
+
+            $('a[href="#tab6"]').on('shown.bs.tab', function (e) {
+                $('#facetDataType').val('');
+                $('#facetState').val('Governance');
+                $('#activeTab').val('6');
+                $('#currentPage').val(1);
+                $('#norepostform').submit();
+            });
+
+            $('a[href="#tab7"]').on('shown.bs.tab', function (e) {
+                $('#facetDataType').val('Discussion');
+                $('#facetState').val('');
+                $('#activeTab').val('7');
+                $('#currentPage').val(1);
+                $('#norepostform').submit();
+            });
+
+            $('a[data-id2="Facet"]').click(function (e) {
+                e.preventDefault();
+                var _id = $(this).attr('id');
+                var _facTyp = $(this).attr('href');
+                if (_facTyp == "Media")
+                    $('#facetMedia').val(_id);
+                if (_facTyp == "Record_Source")
+                    $('#facetRecordSource').val(_id);
+                if (_facTyp == "Agency")
+                    $('#facetAgency').val(_id);
+                if (_facTyp == "State_or_Tribal")
+                    $('#facetState').val(_id);
+                if (_facTyp == "Tags")
+                    $('#facetTags').val(_id);
+                if (_facTyp == "Population_Density")
+                    $('#facetPopDensity').val(_id);
+                if (_facTyp == "EPA_Region")
+                    $('#facetRegion').val(_id);
+                if (_facTyp == "Status")
+                    $('#facetStatus').val(_id);
+
+                $('#currentPage').val(1);
+                $('#norepostform').submit();
+            });
+
+            $('.removeFacet').click(function (e) {
+                e.preventDefault();
+                var _facTyp = $(this).attr('data-id2');
+                if (_facTyp == "Media")
+                    $('#facetMedia').val('');
+                if (_facTyp == "Record_Source")
+                    $('#facetRecordSource').val('');
+                if (_facTyp == "Agency")
+                    $('#facetAgency').val('');
+                if (_facTyp == "State_or_Tribal")
+                    $('#facetState').val('');
+                if (_facTyp == "Tags")
+                    $('#facetTags').val('');
+                if (_facTyp == "Population_Density")
+                    $('#facetPopDensity').val('');
+                if (_facTyp == "EPA_Region")
+                    $('#facetRegion').val('');
+                if (_facTyp == "Status")
+                    $('#facetStatus').val('');
+
+                $('#currentPage').val(1);
+                $('#norepostform').submit();
+            });
+
+
+            //pagination handling
+            $('.page-item a').click(function (e) {
+                var txt = $(e.target).text();
+                var _totalRec = @(Model.searchResults != null ? Model.searchResults.Count : 1);
+                var _totalPages = Math.round(_totalRec / 50) + 1;
+                if (txt == 'Next') {
+                    if (parseInt($('#currentPage').val()) == _totalPages) {
+                        return false;
+                    }
+                    else {
+                        $('#currentPage').val(parseInt($('#currentPage').val()) + 1);
+                    }
+                }
+                else if (txt == 'Previous')
+                {
+                    if (parseInt($('#currentPage').val()) == 1) {
+                        return false;
+                    }
+                    else {
+                        $('#currentPage').val($('#currentPage').val() - 1);
+                    }
+                }
+                else if (txt == 'First')
+                {
+                    if (parseInt($('#currentPage').val()) == 1) {
+                        return false;
+                    }
+                    else {
+                        $('#currentPage').val(1);
+                    }
+                }
+                else if (txt == 'Last')
+                {
+                    if (parseInt($('#currentPage').val()) == _totalPages) {
+                        return false;
+                    }
+                    else {
+                        $('#currentPage').val(_totalPages);
+                    }
+                }
+                else
+                    $('#currentPage').val(txt);
+                $('#norepostform').submit();
+                return false;
+            });
+
+        });
+
+    </script>
+}

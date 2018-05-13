@@ -1,0 +1,72 @@
+﻿@using EECIP.App_Logic.BusinessLogicLayer;
+@model EECIP.App_Logic.DataAccessLayer.TopicOverviewDisplay
+
+<div class="topicrow topicsticky-@(Model._topic.IsSticky.ToString().ToLower()) topiclocked-@(Model._topic.IsLocked.ToString().ToLower()) topicsolved-@(Model._topic.Solved.ToString().ToLower())">
+
+    <div class="rowcreater hidden-xs">
+        <a href="@Url.Action("UserCard", "Dashboard", new { strid = Model._topic.MembershipUser_Id })">
+            <div class="circle-tile-heading" style="display:inline-grid; background-image:url(/Content/Images/Users/@(Model._topic.MembershipUser_Id).png)"  alt="@Model.topicCreator">
+            </div>
+        </a>
+    </div>
+
+    <div class="rowdetails"  style="margin-left:90px;">
+        @*<p class="category categorysolved@(Model._topic.Solved.ToString().ToLower())" style=" ">Category: <a href="#">Category Name</a></p>*@
+        <h3>
+            <a title="#" href="@Url.Action("ShowTopic", "Forum", new { slug = Model._topic.Slug })">
+                @if (Model._topic.IsSticky)
+                {
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                }
+                @if (Model._topic.IsLocked)
+                {
+                    <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
+                }
+                @*@if (Model._topic.Poll != null)
+                {
+                    <span class="glyphicon glyphicon-align-left" aria-hidden="true"></span>
+                }*@
+                @Html.Raw(Model._topic.Name)
+            </a>
+        </h3>
+        @Utils.ReturnAmountWordsFromString(Utils.StripHtmlFromString(Model._postStart.PostContent), 50)
+        @*@if (Model.ShowUnSubscribedLink)
+        {
+            <p>
+                <a href="#" class="emailunsubscription" data-id="@Model.Topic.Id" data-type="topic">
+                    <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+                    @Html.LanguageString("Topic.UnSubscribe")
+                </a>
+            </p>
+        }*@
+
+        @if (Model._topic != null)
+        {
+        <div class="tagsinput clearfix">
+            @foreach (var tag in Model.topicTags)
+            {
+            <span class="tag"><span><a href="@Url.Action("Index", "Forum", new { tag = tag.TopicTag })">@Html.Raw(tag.TopicTag)</a></span></span>
+            }
+        </div>
+        }
+
+        <p class="topicrowfooterinfo">
+            @*<a href="@Html.Raw(Model.LastPostPermaLink)">
+                <img src="@Model.Topic.LastPost.User.MemberImage(SiteConstants.Instance.GravatarLatestBySize)" class="latestby" alt="@Model.Topic.LastPost.User.UserName">
+            </a>*@
+            Latest By
+            <a href="@Url.Action("UserCard", "Dashboard", new { strid = Model._postLatest.Post.MembershipUser_Id })">@Model._postLatest.PosterDisplayName</a>
+            @EECIP.App_Logic.BusinessLogicLayer.Utils.GetPrettyDate(Model._postLatest.Post.DateCreated.ToString())
+
+            <span class="stats topicanswers"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> @Model.postCount</span>
+            <span class="stats topicviews"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> @Model._topic.Views</span>
+            <span class="stats topicupvotes"><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> @Model.upVoteCount</span>
+            <span class="stats topicdownvotes"><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span> @Model.downVoteCount</span>
+            @if (Model._topic.Solved)
+            {
+                <span class="stats topicsolved text-green text-bold"><span class="glyphicon glyphicon-ok text-green" aria-hidden="true"></span> Solved</span>
+            }
+        </p>
+
+    </div>
+</div>
